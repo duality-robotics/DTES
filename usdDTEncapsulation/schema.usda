@@ -1,0 +1,377 @@
+#usda 1.0
+(
+    subLayers = [
+       @usdGeom/schema.usda@
+    ]
+)
+over "GLOBAL" (
+    customData = {
+        string libraryName = "usdDTEncapsulation"
+        string libraryPath = "."
+        string tokensPrefix = "Dt"
+        string libraryPrefix = ""
+        dictionary libraryTokens = {
+            dictionary kilogramsPerUnit = {
+                string doc = """Stage-level metadata that encodes a scene's
+                linear unit of measure as kilograms per encoded unit."""
+            }
+        }
+    }
+)
+{
+}
+
+
+class dtEncapsulation "dtEncapsulation"
+(
+    doc = """A digital twin encapsulation."""
+    inherits = </Xformable>
+)
+{
+    token dtTwinType (
+        allowedTokens = ["ItemTwin", "SpaceTwin", "SystemTwin"]
+        customData = {
+            string apiName = "dtTwinType"
+        }
+
+        doc = """The type of digital twin.
+        ItemTwin: A digital twin of a single item.
+        SpaceTwin: A digital twin of a space.
+        SystemTwin: A digital twin of a system.
+        """
+    )
+
+    string dtDisplayName = "" (
+        customData = {
+            string apiName = "dtDisplayName"
+        }
+
+        doc = """The display name of the digital twin."""
+    )
+}
+
+
+class dtObjectReference "dtObjectReference"
+(
+    doc = """A reference to an asset file."""
+    inherits = </Imageable>
+)
+{
+    asset dtAsset (
+        customData = {
+            string apiName = "dtAsset"
+        }
+
+        doc = """The path to the asset that contains, at least, the appearance of the object.
+        It can also contain physics properties (e.g. UAssets and USD Physics Schema)
+        """
+    )
+
+    string dtScope = "/" (
+        doc = """The scope in the hierarchy of the asset. Defaults to the root."""
+        customData = {
+            string apiName = "dtScope"
+        }
+    )
+
+    string dtPreview = "" (
+        customData = {
+            string apiName = "dtPreview"
+        }
+
+        doc = """The path or URL to the preview of the asset. e.g a thumbnail. Optional"""
+    )
+
+    string dtSHA256 = "" (
+        customData = {
+            string apiName = "dtSHA256"
+        }
+
+        doc = """The SHA256 hash of the asset. Optional"""
+    )
+
+    string[] dtArchitectures = ["default"] (
+        customData = {
+            string apiName = "dtArchitectures"
+        }
+
+        doc = """The architectures that the asset is compatible with. e.g. [win-ue5.0, linux-ue5.1]"""
+    )
+}
+
+
+class dtScope "dtScope"
+(
+    doc = """An object scope within a dtObjectReference.
+    Can only contain dtPhysics objects.
+    """
+    inherits = </Xformable>
+)
+{
+}
+
+
+class dtPhysics "dtPhysics"
+(
+    doc = """This is the scope for physics-related properties of a specific object.
+    Can only be contained within a dtScope or a dtObjectReference.
+    When contained within a dtObjectReference, the physics definition is applied to
+    the object referenced by the dtScope property.
+    When contained within a dtScope, the physics definition is applied to the object
+    referenced by the name of the dtScope.
+
+    If the object to which the physics definition is applied is not a leaf in the hierarchy,
+    the physics definition is applied to the object and all of its descendants.
+    """
+    inherits = </Typed>
+)
+{
+    token dtPhysicsType (
+        allowedTokens = ["Static", "Dynamic", "Kinematic"]
+        customData = {
+            string apiName = "dtPhysicsType"
+        }
+
+        doc = """The type of physics to apply to the object.
+        Static: The object is static and does not move.
+        Dynamic: The object is dynamic and moves according to the physics simulation.
+        Kinematic: The object will not be affected by physics, but it can move.
+        """
+    )
+
+    double dtMass = 0.0 (
+        customData = {
+            string apiName = "dtMass"
+        }
+
+        doc = """If non-zero, directly specifies the mass of the object.
+        Note that any child prim can also have a mass when they apply massAPI.
+        In this case, the precedence rule is 'parent mass overrides the
+        child's'. This may come as counter-intuitive, but mass is a computed
+        quantity and in general not accumulative. For example, if a parent
+        has mass of 10, and one of two children has mass of 20, allowing
+        child's mass to override its parent results in a mass of -10 for the
+        other child. Note if mass is 0.0 it is ignored.
+        Ignored for Kinematic and Static objects.
+        Units: mass.
+        """
+    )
+
+    double dtDensity = 0.0 (
+        customData = {
+            string apiName = "dtDensity"
+        }
+
+        doc = """If non-zero, specifies the density of the object.
+        In the context of rigid body physics, density indirectly results in
+        setting mass via (mass = density x volume of the object). How the
+        volume is computed is up to implementation of the physics system.
+        It is generally computed from the collision approximation rather than
+        the graphical mesh. In the case where both density and mass are
+        specified for the same object, mass has precedence over density.
+        Unlike mass, child's prim's density overrides parent prim's density
+        as it is accumulative. Note if density is 0.0 it is ignored.
+        Ignored for Kinematic and Static objects.
+        Units: mass/distance/distance/distance."""
+    )
+
+    point3d dtCenterOfMass = (0.0, 0.0, 0.0) (
+        customData = {
+            string apiName = "dtCenterOfMass"
+        }
+
+        doc = """Center of mass in the prim's local space.
+        Ignored for Kinematic and Static Twins.
+        Units: distance."""
+    )
+
+    double3 dtRotationalInertia = (0.0, 0.0, 0.0) (
+        customData = {
+            string apiName = "dtRotationalInertia"
+        }
+
+        doc = """If non-zero, specifies rotational inertia tensor along the
+        principal axes. Note if diagonalInertial is (0.0, 0.0, 0.0) it is
+        ignored. Ignored for Kinematic and Static objects.
+        Units: mass*distance*distance."""
+    )
+
+    double dtStaticFriction = 0.0 (
+        customData = {
+            string apiName = "dtStaticFriction"
+        }
+
+        doc = """Static Friction coefficient. Unitless."""
+    )
+
+    double dtDynamicFriction = 0.0 (
+        customData = {
+            string apiName = "dtDynamicfriction"
+        }
+
+        doc = """Dynamic Friction coefficient. Unitless."""
+    )
+
+    double dtRestitution = 0.0 (
+        customData = {
+            string apiName = "dtRestitution"
+        }
+
+        doc = """Restitution coefficient. Unitless."""
+    )
+
+    rel dtCollisionShape (
+        customData = {
+            string apiName = "dtCollisionShapes"
+        }
+
+        doc = """
+        A relationship to a dtCollisionShape scope that defines the collision
+        bounds for this object.
+        """
+    )
+}
+
+
+class dtCollisionShape "dtCollisionShape"
+(
+    doc = """This scope defines the collision bounds for a dtPhysics object.
+    dtCollisionShapes can only contain Gprims and/or implement one (and only one)
+    of the Approximation schemas.
+
+    The only accepted Gprims are Cube, Sphere, Capsule and Mesh.
+    The only accepted Approximation are dtSphereApproximation, dtBoxApproximation,
+    dtHollowBoxApproximation, dtCapsuleApproximation and dtConvexHullApproximation.
+    """
+
+    inherits = </Xformable>
+)
+{
+    token visibility = "invisible"
+}
+
+
+class "dtSphereApproximationAPI"
+(
+    doc = """This scope defines a sphere approximation for a dtCollisionShape."""
+
+    inherits = </APISchemaBase>
+)
+{
+    double dtPadding = 0.0 (
+        customData = {
+            string apiName = "dtPadding"
+        }
+
+        doc = """Padding of radius of the sphere approximation"""
+    )
+}
+
+
+class "dtBoxApproximationAPI"
+(
+    doc = """This scope defines a box approximation for a dtCollisionShape."""
+
+    inherits = </APISchemaBase>
+)
+{
+    double3 dtPadding = (0.0, 0.0, 0.0) (
+        customData = {
+            string apiName = "dtPadding"
+        }
+
+        doc = """Padding of the box approximation."""
+    )
+}
+
+
+class "dtHollowBoxApproximationAPI"
+(
+    doc = """This scope defines a hollow box approximation for a dtCollisionShape."""
+
+    inherits = </APISchemaBase>
+)
+{
+    double3 dtPadding = (0.0, 0.0, 0.0) (
+        customData = {
+            string apiName = "dtPadding"
+        }
+
+        doc = """Padding of the box approximation."""
+    )
+
+    double dtWallThickness = 0.0 (
+        customData = {
+            string apiName = "dtWallThickness"
+        }
+
+        doc = """Thickness of the walls of the hollow box approximation."""
+    )
+}
+
+
+class "dtCapsuleApproximationAPI"
+(
+    doc = """This scope defines a capsule approximation for a dtCollisionShape."""
+
+    inherits = </APISchemaBase>
+)
+{
+    double dtRadiusPadding = 0.0 (
+        customData = {
+            string apiName = "dtRadiusPadding"
+        }
+
+        doc = """Padding of the radius of capsule approximation."""
+    )
+
+    double dtHeightPadding = 0.0 (
+        customData = {
+            string apiName = "dtHeightPadding"
+        }
+
+        doc = """Padding of the height of capsule approximation."""
+    )
+
+    token dtAxis = "Z" (
+        customData = {
+            string apiName = "dtAxis"
+        }
+        allowedTokens = ["X", "Y", "Z"]
+
+        doc = """Axis of the capsule approximation."""
+    )
+}
+
+
+class "dtConvexHullApproximationAPI"
+(
+    doc = """This scope defines a convex hull approximation for a dtCollisionShape."""
+
+    inherits = </APISchemaBase>
+)
+{
+    int dtResolution = 100000 (
+        customData = {
+            string apiName = "dtResolution"
+        }
+
+        doc = """Convex hull resolution"""
+    )
+
+    int dtMaxVertices = 16 (
+        customData = {
+            string apiName = "dtMaxVertices"
+        }
+
+        doc = """Maximum number of vertices"""
+    )
+
+    int dtMaxHulls = 4 (
+        customData = {
+            string apiName = "dtMaxHulls"
+        }
+
+        doc = """Maximum number of hulls"""
+    )
+}

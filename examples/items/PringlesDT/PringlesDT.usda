@@ -1,0 +1,171 @@
+#usda 1.0
+(
+    upAxis = "Z"
+    metersPerUnit = 0.01
+    kilogramsPerUnit = 1
+    defaultPrim = "Pringles"
+)
+
+
+def dtEncapsulation "Pringles"
+(
+    # Two types of variants are supported: "style" and "LOD"
+    # "style" is used to select between different styles of the same item
+    # "LOD" is used to select between different levels of detail
+    variants = {
+        string style = "Original"  # Default style
+        string LOD = "Med"  # Default LOD
+    }
+    prepend variantSets = ["style", "LOD"]
+)
+{
+    # Item Twins are digital replicas of simple objects
+    # such as consumer packaged goods, trees, books, etc.
+    token dtType = "ItemTwin"
+
+    # An object reference is a reference to an asset that contains, at least, the appearance of the object.
+    # It can also contain physics properties (e.g. UAssets and USD Physics Schema)
+    # If an object reference for the current architecture is found, it takes precedence over the default object reference.
+    # ObjectReferences could contain LOD support (e.g. UAssets)
+    # If multiple references for the current architecture are found, is up to the parser to decide which one to use.
+    def dtObjectReference "UAssetWin"
+    {
+        asset dtAsset  # Assigned in the variant
+        string dtScope  # Assigned in the variant
+        string[] dtArchitectures = ["win-ue5.0"]
+        string dtSHA256  # Assigned in the variant. Optional
+    }
+
+    def dtObjectReference "GLTF"
+    {
+        asset dtAsset  # Assigned in the variant
+        string dtScope  # Assigned in the variant.
+        string dtSHA256  # Assigned in the variant. Optional
+
+        def dtPhysics "Physics"
+        {
+            token dtPhysicsType = "Dynamic"
+            double dtMass = 0.1
+            double dtRestitution = 0.3
+            double dtStaticFriction = 0.5
+
+            def dtCollisionShape "CollisionShapeConvexHull"
+            (
+                prepend apiSchemas = ["dtConvexHullApproximationAPI"]
+            )
+            {
+                int dtResolution = 100000
+                int dtMaxVertices = 16
+                int dtMaxHulls = 4
+            }
+
+            def dtCollisionShape "CollisionShapeUsdGeoms"
+            {
+                def Cube "BoundingCube"
+                {
+                    double3 xformOp:scale = (11.5, 11.5, 13)
+                    uniform token[] xformOpOrder = ["xformOp:scale"]
+                }
+            }
+
+            def dtCollisionShape "CollisionShapeBoxApproximation"
+            (
+                prepend apiSchemas = ["dtBoxApproximationAPI"]
+            )
+            {
+                double3 dtPadding = (0.5, 0.5, 0.5)
+            }
+
+            rel dtCollisionShape  # Assigned in the variant
+        }
+    }
+
+    # Generic scopes can be used to add additional domain-specific metadata.
+    def Scope "RetailCatalog"  # Additional Metadata for domain specific scope
+    {
+        string GTIN  # Assigned in the variant
+        string Brand = "Kellog's"
+        string LaunchDate = "2023-01-23"
+    }
+
+    # "Capture" scope can be used to add metadata related to the capture process.
+    def Scope "Capture"
+    {
+        def Scope "PringlesOriginalRigImages"
+        {
+            asset rigImagesPath = @./rig_images_pringles_original.zip@
+            asset masksPath = @./mask_images_pringles_original.zip@
+        }
+
+        def Scope "PringlesCheddarCheeseRigImages"
+        {
+            asset rigImagesPath = @./rig_images_pringles_cheddar_cheese.zip@
+            asset masksPath = @./mask_images_pringles_cheddar_cheese.zip@
+        }
+    }
+
+    # In this example, the UAsset already contains LOD support.
+    # The LOD variant set is used to define the LOD levels of the object.
+    variantSet "LOD" = {
+        "High" {
+            over "GLTF" {
+                string dtScope = "/HIGH"
+                over "Physics" {
+                    # Different collision shapes can be used for different LOD levels.
+                    rel dtCollisionShape = </Pringles/GLTF/Physics/CollisionShapeConvexHull>
+                }
+            }
+        }
+
+        "Med" {
+            over "GLTF" {
+                string dtScope = "/MEDIUM"
+                over "Physics" {
+                    rel dtCollisionShape = </Pringles/GLTF/Physics/CollisionShapeUsdGeoms>
+                }
+            }
+        }
+
+        "Low" {
+            over "GLTF" {
+                string dtScope = "/LOW"
+                over "Physics" {
+                    rel dtCollisionShape = </Pringles/GLTF/Physics/CollisionShapeBoxApproximation>
+                }
+            }
+        }
+    }
+
+    # The Style variant set is used to define the different styles of the object.
+    variantSet "style" = {
+        "Original" {
+            over "UAssetWin" {
+                asset dtAsset = @./pringles_win-ue5.0.pak@
+                string dtScope = "/Game/Blueprints/BP_Pringles.BP_Pringles_C"
+                string dtSHA256 = "9178BFB27859AD3BEF9D1B193C96E35DB4F1E003336F7144FEA7DC11430C472A"
+            }
+            over "GLTF" {
+                asset dtAsset = @./pringles_original.glb@
+                string dtSHA256 = "213E0BD687892B9DB8192BB74E1F2F4FFDD54DFAD930D859AD00018C98530633"  # Optional
+            }
+            over "RetailCatalog" {
+                string GTIN = "0038000845512"
+            }
+        }
+
+        "CheddarCheese" {
+            over "UAssetWin" {
+                asset dtAsset = @./pringles_win-ue5.0.pak@
+                string dtScope = "/Game/Blueprints/BP_PringlesCheddarCheese.BP_PringlesCheddarCheese_C"
+                string dtSHA256 = "9178BFB27859AD3BEF9D1B193C96E35DB4F1E003336F7144FEA7DC11430C472A"
+            }
+            over "GLTF" {
+                asset dtAsset = @./pringles_cheddar_cheese.glb@
+                string dtSHA256 = "8ADAC5F653045934EF35722F0C377D73197508A16A4418A6FCA0BD243633E761"  # Optional
+            }
+            over "RetailCatalog" {
+                string GTIN = "0038000845536"
+            }
+        }
+    }
+}

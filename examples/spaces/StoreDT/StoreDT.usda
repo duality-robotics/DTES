@@ -1,0 +1,84 @@
+#usda 1.0
+(
+    upAxis = "Z"
+    metersPerUnit = 0.01
+    kilogramsPerUnit = 1.0
+    defaultPrim = "StoreSpace"
+)
+
+
+def dtEncapsulation "StoreSpace"
+(
+)
+{
+    # A Space Twin is a collection of objects that represent a physical space, such as a store, a factory, a building, etc.
+    token dtTwinType = "SpaceTwin"
+
+    # An object reference is a reference to an asset that contains, at least, the appearance of the object.
+    # It can also contain physics properties (e.g. a pak file and USD Physics Schema)
+    # If a compiled object reference for the current architecture is found, it takes precedence over the default object reference.
+    def dtObjectReference "UAssetWindows"
+    {
+        asset dtAsset = @./store_win-ue5.0.pak@
+        string dtScope = "/Game/Maps/Store"
+        token[] dtArchitectures = ["windows-ue5.0"]
+        string dtSHA256 = "282222BE8ACC412DD4475BC5164AD4B02757710BD04CBE64CA9478DA54004BFD"  # Optional
+    }
+
+    # If no compiled object reference is found, the default object reference is used.
+    # For interoperability purposes, there should always be a default object reference.
+    def dtObjectReference "GLTF"
+    {
+        asset dtAsset = @./store.glb@
+        string dtScope = "/"  # We are currently using a string in order not to break the USD parser.
+        string dtSHA256 = "ED4840F32DE7218D431D83E37E5932C8417F270BDF9A59E27D01CB9BBC0F25B7"  # Optional
+        string[] dtArchitectures = ["default"] # If no architecture is specified, it is assumed to be "default"
+
+        # A Space Twin is a collection of objects.
+        # Each object can have its own physics properties (mass, friction, etc.) and collision shape.
+
+        # a dtScope named after the object scope is used to override the object's properties
+        # and/or define it's physics properties.
+        # The scope is relative to the dtObjectReference hierarchy.
+        def dtScope "SM_EnviroDome"
+        {
+            # A dtPhysics scope is a collection of properties that are used to determine the physics properties of an object.
+            def dtPhysics "SM_EnviroDomePhysics"
+            {
+                token dtPhysicsType = "Static"
+                double dtStaticFriction = 0.5
+                double dtRestitution = 0.3
+
+                # A collision shape is a collection of shapes that are used to determine the collision volume of an object.
+                def dtCollisionShape "RoomCollider"
+                (
+                    prepend apiSchemas = ["dtHollowBoxApproximationAPI"]
+                )
+                {
+                }
+
+                rel dtCollisionShape = <RoomCollider>
+            }
+        }
+
+        def dtScope "SM_Table"
+        {
+
+            def dtPhysics "SM_TablePhysics"
+            {
+                token dtPhysicsType = "Kinematic"
+                double dtStaticFriction = 0.2
+                double dtRestitution = 0.5
+
+                def dtCollisionShape "TableCollider"
+                (
+                    prepend apiSchemas = ["dtBoxApproximationAPI"]
+                )
+                {
+                }
+
+                rel dtCollisionShape = <TableCollider>
+            }
+        }
+    }
+}

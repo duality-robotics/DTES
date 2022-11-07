@@ -1,0 +1,95 @@
+#usda 1.0
+(
+    upAxis = "Z"
+    metersPerUnit = 0.01
+    kilogramsPerUnit = 1.0
+    defaultPrim = "StoreSpace"
+)
+
+def dtEncapsulation "StoreSpace"
+(
+)
+{
+    # Everything in a space twin is static/kinematic. Mass and related properties are ignored.
+    token dt:type = "SpaceTwin"
+
+    # If a compiled object reference for the current architecture is found, it takes precedence over the default object reference.
+    def dtCompiledObjectReference "UAssetWindows"
+    {
+        asset dtObjectReference:asset = @./store_win-ue5.0.pak@
+        string dtObjectReference:scope = "/Game/Maps/Store"
+        token[] dtObjectReference:architecture = ["windows-ue5.0"]
+        string dtObjectReference:sha256 = "282222BE8ACC412DD4475BC5164AD4B02757710BD04CBE64CA9478DA54004BFD"  # Optional
+    }
+
+    def dtCompiledObjectReference "UAssetLinux"
+    {
+        asset dtObjectReference:asset = @./store_linux-ue5.0.pak@
+        string dtObjectReference:scope = "/Game/Maps/Store"
+        token[] dtObjectReference:architecture = ["linux-ue5.0"]
+    }
+
+    # If no compiled object reference is found, the default object reference is used.
+    # For interoperability purposes, there should always be a default object reference.
+    def dtDefaultObjectReference "DefaultObjectReference"
+    {
+        # An object reference is a reference to an asset that contains, at least, the appearance of the object.
+        # It can also contain physics properties (e.g. USD Physics Schema)
+        def dtObjectReference "GLTF"
+        {
+            asset dtObjectReference:asset = @./store.glb@
+            string dtObjectReference:scope = "/"  # We are currently using a string in order not to break the USD parser.
+            string dtObjectReference:sha256 = "90662ADEF6D485FC1619CBAB94D247E06DF07FF5CBE006B963C8AEA9B8C68BDC"  # Optional
+        }
+
+        def dtDefaultPhysics "DefaultPhysics"
+        {
+            # A Space Twin is a collection of objects that are static/kinematic.
+            # Each object can have its own physics properties (mass, friction, etc.) and collision shape.
+            def dtObjectPhysics "RoomPhysics"
+            {
+                # A collision shape is a collection of shapes that are used to determine the collision volume of an object.
+                def dtCollisionShape "RoomCollider"
+                {
+                    def dtBoxApproximation "BoxApproximation"
+                    {
+                    }
+                }
+
+                # double dtObjectPhysics:mass  # Ignored, in Space Twins everything is kinematic
+                # double dtObjectPhysics:density  # Ignored, in Space Twins everything is kinematic
+                # double dtObjectPhysics:centerOfMass  # Ignored, in Space Twins everything is kinematic
+                double dtObjectPhysics:staticFriction = 0.5
+                double dtObjectPhysics:restitution = 0.3
+
+                # The scope is relative to the DefaultObjectReference hierarchy. Defaults to the root of that hierarchy.
+                string dtObjectPhysics:scope = "/SM_EnviroDome"  # We are currently using a string in order not to break the USD parser.
+                rel dtObjectPhysics:collisionShape = </RoomCollider>
+            }
+
+            def dtObjectPhysics "TablePhysics"
+            {
+                def dtCollisionShape "TableCollider"
+                {
+                    def dtBoxApproximation "BoxApproximation"
+                    {
+                    }
+                }
+
+                double dtObjectPhysics:staticFriction = 0.2
+                double dtObjectPhysics:restitution = 0.5
+
+                string dtObjectPhysics:scope = "/SM_Table"
+                rel dtObjectPhysics:collisionShape = </TableCollider>
+            }
+
+            double dtDefaultPhysics:staticFrictionScaler = 0.5  # Scale the static friction of all objects
+            double dtDefaultPhysics:restitutionScaler = 0.3  # Scale the restitution of all objects
+        }
+        # The default object reference is used if no compiled object reference is found.
+        rel dtDefaultObjectReference:defaultAppearance = </GLTF>
+
+        # The default physics can point to a dtDefaultPhysics or a dtObjectReference that contains a physics definition of the object.
+        rel dtDefaultObjectReference:defaultPhysics = </DefaultPhysics>
+    }
+}
