@@ -11,6 +11,12 @@ The DTES is a proposed standard for representing digital twins using USD. It pro
 DTES In Practice
 ----------------
 
+
+
+https://user-images.githubusercontent.com/2530388/219462159-b0598d8e-7146-4fe6-b852-929513743eb3.mp4
+
+
+
 Below is a basic example of a DT definition in DTES.
 
 ```usda
@@ -62,7 +68,7 @@ def dtEncapsulation "Pringles"
 In the [examples folder](./examples) you can find more complex examples of:
 1. An [Item Twin](./examples/items/PringlesDT/PringlesDT.usda) with multiple LODs and style variants, and multiple object references for specific architectures.
 2. A [Space Twin](./examples/items/../spaces/StoreDT/StoreDT.usda) with composition arcs over compiled objects, and multiple object references for specific architectures.
-3. A simple [Scenario](./examples/scenarios/StoreScenario.usda) example using the other twins.
+3. A [Scenario](./examples/scenarios/StoreScenario.usda) example, showed in the video above, using the other twins.
 
 
 What is a Digital Twin?
