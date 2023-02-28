@@ -3,6 +3,8 @@ Digital Twin Encapsulation Standard
 Welcome to the Digital Twin Encapsulation Standard (DTES) repository. The DTES is a proposal to enable the standardization and interoperability of digital twins (DT). The standard is based on Pixar's USD (Universal Scene Description) framework.
 
 
+You can access the DTES slides presentation [here](https://lnkd.in/gCU92QGh).
+
 What is the DTES?
 -----------------
 The DTES is a proposed standard for representing digital twins using USD. It provides a set of schemas and guidelines for organizing and storing information about a digital twin, such as its appearance, physics, and domain specific metadata. By using the DTES, developers can create digital twins that are compatible with a wide range of systems and platforms.
