@@ -79,7 +79,8 @@ A digital twin is a digital replica of a physical object or system that can be u
 
 A DT is more than a visual replica of its physical counterpart. It needs to be "simulation-ready," meaning it should behave and function like the real-world object it represents, carrying information and properties tied to its ontology and physics.
 
-![image4](https://user-images.githubusercontent.com/2530388/218102889-df17ee33-926f-4112-ba6d-b346c891124a.png)
+![DTES Presentation - Structure](https://user-images.githubusercontent.com/123972574/222506402-21bf64cc-5d1b-4aca-83a2-28baf3f33d91.png)
+
 
 As shown in the figure above, the information that constitutes a DT can be divided into three categories: 3D Assets Properties, Digital Twin Properties, and Platform Properties.
 
